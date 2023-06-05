@@ -22,7 +22,6 @@ class PostController extends AbstractController
         return $this->render('post/index.html.twig', ['posts' => $posts]);
     }
 
-
     #[Route('/create/{msg?}', name: 'create')]
     public function create(EntityManagerInterface $entityManager, Request $request) : Response
     {
