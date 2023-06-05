@@ -13,7 +13,7 @@ class MainController extends AbstractController
     #[Route('/', name: 'home')]
     public function index()
     {
-        return new Response(content: '<h1> Bienvenue sur le tutoriel Symfony ! </h1>');
+        return $this->render('home/index.html.twig');
     }
 
     #[Route('/custom/{name?}', name: 'custom')]
@@ -22,12 +22,11 @@ class MainController extends AbstractController
         $name = $request->get('name');
         if ($name == null)
         {
-            return new Response(content: ' <h1> Welcome to the Custom Page. You are not logged in </h1>');
+            $name = "Undefined";
         }
-        else
-        {
-        return new Response(content: ' <h1> Welcome ' . $name . ' to the Custom Page </h1>');
-        }
+        return $this->render('home/custom.html.twig', [
+        'name' => $name
+        ]);
     }
 
 }
