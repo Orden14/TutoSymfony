@@ -13,7 +13,7 @@
             {% for post in posts %}
             <tr>
                 <td>{{ post.id }}</td>
-                <td>{{ post.title }}</td>
+                <td><a href="{{ path('postshowPost', { id: post.id }) }}"> {{ post.title }} </a></td>
             </tr>
             {% endfor %}
         </tbody>
