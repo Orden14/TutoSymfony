@@ -26,7 +26,6 @@ class PostController extends AbstractController
     #[Route('/show/{id}', name: 'show')]
     public function showPost(Post $post) : Response
     {
-        dump($post); die;
         return $this->render('post/show.html.twig', ['post' => $post]);
     }
 
@@ -41,8 +40,19 @@ class PostController extends AbstractController
 
         if ($form->isSubmitted())
         {
-            $entityManager->persist($post);
-            $entityManager->flush();
+            $file = $request->files->get('post')['attachment'];
+            if ($file)
+            {
+                $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
+                $file->move(
+                    $this->getParameter('uploads_dir'),
+                    $filename
+                );
+
+                $post->setImage($filename);
+                $entityManager->persist($post);
+                $entityManager->flush();
+            }
             return $this->redirect($this->generateUrl('postindex'));
         }
 
