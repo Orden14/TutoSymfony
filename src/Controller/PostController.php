@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\PostRepository;
+use App\Services\FileUploader;
 
 #[Route('/post', name: 'post')]
 class PostController extends AbstractController
@@ -26,11 +27,16 @@ class PostController extends AbstractController
     #[Route('/show/{id}', name: 'show')]
     public function showPost(Post $post) : Response
     {
+        // ici (en commentaire) exemple d'utilisation des repository pour faire des requetes
+        // $post = $postRepository->findPostWithCategory($id); 
+        // dump($post);
+        // retrouver la fonction dans postRepository
+
         return $this->render('post/show.html.twig', ['post' => $post]);
     }
 
     #[Route('/create', name: 'create')]
-    public function create(Request $request, EntityManagerInterface $entityManager) : Response
+    public function create(Request $request, EntityManagerInterface $entityManager, FileUploader $fileUploader) : Response
     {
         $post = new Post();
 
@@ -43,11 +49,7 @@ class PostController extends AbstractController
             $file = $request->files->get('post')['attachment'];
             if ($file)
             {
-                $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
-                $file->move(
-                    $this->getParameter('uploads_dir'),
-                    $filename
-                );
+                $filename = $fileUploader->uploadFile($file);                
 
                 $post->setImage($filename);
                 $entityManager->persist($post);
