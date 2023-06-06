@@ -14,43 +14,47 @@ use App\Repository\PostRepository;
 class PostController extends AbstractController
 {
 
-    #[Route('/', name: 'show')]
-    public function show(PostRepository $postRespository)
+    #[Route('/', name: 'index')]
+    public function show(PostRepository $postRespository) : Response
     {
         $posts = $postRespository->findAll();
 
         return $this->render('post/index.html.twig', ['posts' => $posts]);
     }
 
-    #[Route('/show/{id}', name: 'showPost')]
-    public function showPost(Post $post)
+    #[Route('/{id}', name: 'show')]
+    public function showPost(Post $post) : Response
     {
         dump($post); die;
         return $this->render('post/show.html.twig', ['post' => $post]);
     }
 
-    #[Route('/create/{msg?}', name: 'create')]
+    #[Route('/create/{msg}', name: 'create')]
     public function create(EntityManagerInterface $entityManager, Request $request) : Response
     {
         $msg = $request->get('msg');
 
         $post = new Post();
 
-        if ($msg == null)
-        {
-            $post->setTitle(' Undefined title ');
-        }
-        else
-        {
-            $post->setTitle(htmlspecialchars($msg));
-        }
+        $post->setTitle(htmlspecialchars($msg));
 
         $entityManager->persist($post);
         $entityManager->flush();
 
         // return a response
-        return new Response(' Hey ! The post was created ! <br> The post was : ' . $post->getTitle());
+        return $this->redirect($this->generateUrl(('postindex')));
 
+    }
+
+    #[Route('/delete/{id}', name: 'delete')]
+    public function remove(Post $post, EntityManagerInterface $entityManager) : Response
+    {
+        $entityManager->remove($post);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Post was removed');
+
+        return $this->redirect($this->generateUrl(('postindex')));
     }
 
 }
