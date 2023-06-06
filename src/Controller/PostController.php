@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Form\PostType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,27 +23,32 @@ class PostController extends AbstractController
         return $this->render('post/index.html.twig', ['posts' => $posts]);
     }
 
-    #[Route('/{id}', name: 'show')]
+    #[Route('/show/{id}', name: 'show')]
     public function showPost(Post $post) : Response
     {
         dump($post); die;
         return $this->render('post/show.html.twig', ['post' => $post]);
     }
 
-    #[Route('/create/{msg}', name: 'create')]
-    public function create(EntityManagerInterface $entityManager, Request $request) : Response
+    #[Route('/create', name: 'create')]
+    public function create(Request $request, EntityManagerInterface $entityManager) : Response
     {
-        $msg = $request->get('msg');
-
         $post = new Post();
 
-        $post->setTitle(htmlspecialchars($msg));
+        $form = $this->createForm(PostType::class, $post);
 
-        $entityManager->persist($post);
-        $entityManager->flush();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted())
+        {
+            $entityManager->persist($post);
+            $entityManager->flush();
+            return $this->redirect($this->generateUrl('postindex'));
+        }
+
 
         // return a response
-        return $this->redirect($this->generateUrl(('postindex')));
+        return $this->render('post/create.html.twig', ['form' => $form->createView()]);
 
     }
 
